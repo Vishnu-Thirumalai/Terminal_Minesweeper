@@ -1,28 +1,51 @@
 import java.util.Scanner;
+
 public class Minesweeper
 {
-    public int Crows=0;       // to store custom values 
-    public int Ccolumns=0;    
-    public int Cbombs=0;
+    private int Crows=0;       // to store custom values 
+    private int Ccolumns=0;    
+    private int Cbombs=0;
     
-    public int rows=0;        // to store the number of rows and columns each run       
-    public int columns=0;       
-    public int bombs=0;          
+    private int rows=0;        // to store the number of rows and columns each run       
+    private int columns=0;       
+    private int bombs=0;          
     
-    static public int wins=0;  // to store the number of runs, wins and losses across all objects
-    static public int losses=0;
-    static public int runs=0;
+    static private int wins=0;  // to store the number of runs, wins and losses across all objects
+    static private int losses=0;
+    static private int runs=0;
     
-    public boolean grid[][];    //to store the locations of the mines
-    public byte gridAnswer[][]; //to show the number of mines in proximity to each space
-    public double check=0.8;    //to provide a limit for the mines to be set
-    public boolean admin;       //to activate admin mode
-    Scanner j=new Scanner(System.in);
+    private boolean grid[][];    //to store the locations of the mines
+    private byte gridAnswer[][]; //to show the number of mines in proximity to each space
+    private double check=0.8;    //to provide a limit for the mines to be set
+    private boolean admin;       //to activate admin mode
+    private Scanner j=new Scanner(System.in);
     
     
     public static void main(String args[]) throws Exception{
     	
-    	Minesweeper minesweep = new Minesweeper(7,7,7);
+    	int r = 0;//Rows
+    	int c = 0;//Columns
+    	int b = 0;//Bombs
+    	
+    	try{
+    	    r = Integer.parseInt(args[0]);
+    	    c = Integer.parseInt(args[1]);
+    	    b = Integer.parseInt(args[2]);
+    	    
+    	    if(b >= r*c)
+    	    {
+    	        throw new Exception("Impossible layout");
+    	    }
+    	}
+    	catch(Exception e)
+    	{
+    	    System.out.println("Given dimensions could not be used, using default values.");
+    	    r = 7;
+    	    b = 7;
+    	    c = 7;
+    	}
+    	
+    	Minesweeper minesweep = new Minesweeper(r,c,b);
     	minesweep.start();
     	
     }
@@ -34,7 +57,7 @@ public class Minesweeper
         this.Cbombs=Cbombs;
     }
     
-    public void start()throws Exception //to start the program
+    private void start()throws Exception //to start the program
     {
         admin = false;
         menu();
@@ -51,7 +74,7 @@ public class Minesweeper
         }
     }
     
-    public void menu()throws Exception //to allow choice of the size of the grid and activate admin mode
+    private void menu()throws Exception //to allow choice of the size of the grid and activate admin mode
     {
             check=0.8; 
             
@@ -118,7 +141,7 @@ public class Minesweeper
         
     
     
-    public void gridFill(boolean grid[][],byte gridAnswer[][])// fills the grids with mines and numbers
+    private void gridFill(boolean grid[][],byte gridAnswer[][])// fills the grids with mines and numbers
     {
         int bombDefuse=0;  //to prevent more mines being set than the limit for that difficulty
         for(int i=0;i<rows;i++)
@@ -201,7 +224,7 @@ public class Minesweeper
        play(grid,gridAnswer);
     }
     
-    public void play(boolean grid[][],byte gridAnswer[][])// the actual game coding
+    private void play(boolean grid[][],byte gridAnswer[][])// the actual game coding
     {
         String gridDisplay[][]=new String [rows+2][columns+2];// the 2D matrix which is diplayed
         for(int i=0;i<rows+2;i++)// fills all non-playing areas with line numbers and seperators 
