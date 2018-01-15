@@ -2,23 +2,23 @@ import java.util.Scanner;
 
 public class Minesweeper
 {
-    private int Crows=0;       // to store custom values 
-    private int Ccolumns=0;    
-    private int Cbombs=0;
+    private int Crow;       // to store custom values 
+    private int Ccolumns;    
+    private int Cbombs;
     
-    private int rows=0;        // to store the number of rows and columns each run       
-    private int columns=0;       
-    private int bombs=0;          
+    private int rows;        // to store the number of rows and columns each run       
+    private int columns;      
+    private int bombs;          
     
-    static private int wins=0;  // to store the number of runs, wins and losses across all objects
-    static private int losses=0;
-    static private int runs=0;
+    static private int wins = 0;  // to store the number of runs, wins and losses across all objects
+    static private int losses = 0;
+    static private int runs = 0;
     
     private boolean grid[][];    //to store the locations of the mines
     private byte gridAnswer[][]; //to show the number of mines in proximity to each space
-    private double check=0.8;    //to provide a limit for the mines to be set
+    private double check;    //to provide a limit for the mines to be set
     private boolean admin;       //to activate admin mode
-    private Scanner j=new Scanner(System.in);
+    private Scanner scn;
     
     
     public static void main(String args[]) throws Exception{
@@ -55,14 +55,23 @@ public class Minesweeper
         this.Ccolumns=Ccolumns;
         this.Crows=Crows;
         this.Cbombs=Cbombs;
+        
+        rows = 0;          
+        columns = 0;       
+        bombs = 0;          
+        
+        check = 0.8;   
+        admin = false;     
+        scn = new Scanner(System.in); 
     }
     
     private void start()throws Exception //to start the program
     {
+        
         admin = false;
         menu();
         runs++;
-        System.out.println("We hope you enjoyed your game");
+        System.out.println("We hope you enjoyed your game.");
         System.out.println("See you again soon!"+(char)61514);
         try
         {
@@ -280,9 +289,9 @@ public class Minesweeper
             }
             System.out.println(columns*rows-k-bombs+" spaces remaining");//to show how many non-mine spaces are remaining(requested in beta testing)
             System.out.print("Enter the column number:");
-            c=j.nextInt();
+            c=scn.nextInt();
             System.out.print("Enter the row number:");
-            r=j.nextInt();
+            r=scn.nextInt();
             if(c>columns||r>rows||c<=0||r<=0)//if the player gives invalid co-ordinates
             {
                 System.out.println("Invalid co-ordinates");
