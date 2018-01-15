@@ -45,7 +45,6 @@ public class Minesweeper
     	    c = 7;
     	}
     	
-    	System.out.println(r+" "+c+" "+b);
     	Minesweeper minesweep = new Minesweeper(r,c,b);
     	minesweep.start();
     	
