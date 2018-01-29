@@ -148,13 +148,13 @@ public class Minesweeper
             gridFill();
     }
         
-    private void bombInsert(int y, int x)
+    private void bombInsert(int x, int y)
     {
         grid[y][x] = true; // 00 is the top corner, y increases downwards and x increases right
         
         if(y!=0)// If it's not the top row
         {
-            answerGrid[y-1][j]++;
+            answerGrid[y-1][x]++;
             if(x!=0) //If it's not the top left corner
             {
                answerGrid[y-1][x-1]++;
@@ -165,37 +165,38 @@ public class Minesweeper
                answerGrid[y-1][x+1]++;
 
             }
-          }
+        }
           
-          if(x!=0)// If it's not the leftmost column
+        if(x!=0)// If it's not the leftmost column
+        {
+          answerGrid[y][x-1]++;
+          
+          if(y!=rows-1)//If it's not the bottom left corner
           {
-            answerGrid[y][x-1]++;
-            
-            if(y!=rows-1)//If it's not the bottom left corner
-            {
-              answerGrid[y+1][x-1]++;
-            }
+            answerGrid[y+1][x-1]++;
+          }
+        }          
+           
+        if(y!=rows-1)// If it's not the bottom row
+        {
+          answerGrid[y+1][x]++;
+          
+          if(x!= columns-1)// If it's not the bottom right corner  
+          {
+              answerGrid[y+1][x+1]++;
           }          
-          
-          
-          if(y!=rows-1)// If it's not the bottom row
-          {
-            answerGrid[y+1][x]++;
+        }
             
-            if(x!= columns-1)// If it's not the bottom right corner  
-            {
-                answerGrid[y+1][x+1]++;
-            }          
-          }
-            
-          if(j!=rows-1) // If it's not the rightmost column
-          {
-            answerGrid[i][j+1]++;      
-          }
+        if(x!=columns-1) // If it's not the rightmost column
+        {
+          answerGrid[y][x+1]++;      
+        }
      }
     
     private void gridFill()// fills the grids with mines and numbers
-    {
+    {    
+        /** TODO: Remove this code after testing the new code works
+        
         int bombDefuse=0;  //to prevent more mines being set than the limit for that difficulty
         for(int i=0;i<rows;i++)
         {
@@ -216,13 +217,28 @@ public class Minesweeper
               break;
           }
         }
+        **/
+        
+        int bombsPlaced = 0;
+        int x = 0; 
+        int y = 0;
+        while(bombsPlaced < bombs)
+        {
+            y = (int)(Math.random() * rows);
+            x = (int)(Math.random() * columns);
+            if(grid[y][x])
+                continue;
+            bombInsert(x,y);
+            bombsPlaced++;     
+        }
+        
         if(admin) // opens the special admin features
         {
             peek();
         }
         else // sends non-admins straight to the game
         {
-            play(grid,answerGrid);
+            play();
         }
     }
     
@@ -246,11 +262,11 @@ public class Minesweeper
          System.out.println();
        }  
        String s= scn.next();
-       play(grid,answerGrid);
+       play();
     }
     
     
-    private void play(boolean grid[][],byte answerGrid[][])// the actual game coding
+    private void play()// the actual game coding
     {
         String gridDisplay[][]=new String [rows+2][columns+2];// the 2D matrix which is diplayed
         for(int i=0;i<rows+2;i++)// fills all non-playing areas with line numbers and seperators 
