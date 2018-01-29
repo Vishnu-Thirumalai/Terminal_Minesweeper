@@ -21,7 +21,7 @@ public class Minesweeper
     private Scanner scn;
     
     
-    public static void main(String args[]) throws Exception{
+    public static void main(String args[]){
     	
     	int r = 0;//Rows
     	int c = 0;//Columns
@@ -65,7 +65,7 @@ public class Minesweeper
         scn = new Scanner(System.in); 
     }
     
-    private void start()throws Exception //to start the program
+    private void start()//to start the program
     {
         
         admin = false;
@@ -83,7 +83,7 @@ public class Minesweeper
         }
     }
     
-    private void menu()throws Exception //to allow choice of the size of the grid and activate admin mode
+    private void menu() //to allow choice of the size of the grid and activate admin mode
     {
             check=0.8; 
             
@@ -241,6 +241,8 @@ public class Minesweeper
             play();
         }
     }
+    
+    
     
     void peek() //allows admins to see the layout of the grids(ran every time during alpha testing)
     {
