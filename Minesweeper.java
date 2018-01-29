@@ -2,7 +2,7 @@ import java.util.Scanner;
 
 public class Minesweeper
 {
-    private int Crow;       // to store custom values 
+    private int Crows;       // to store custom values 
     private int Ccolumns;    
     private int Cbombs;
     
@@ -15,7 +15,7 @@ public class Minesweeper
     static private int runs = 0;
     
     private boolean grid[][];    //to store the locations of the mines
-    private byte gridAnswer[][]; //to show the number of mines in proximity to each space
+    private byte answerGrid[][]; //to show the number of mines in proximity to each space
     private double check;    //to provide a limit for the mines to be set
     private boolean admin;       //to activate admin mode
     private Scanner scn;
@@ -75,7 +75,7 @@ public class Minesweeper
         System.out.println("See you again soon!"+(char)61514);
         try
         {
-                Thread.sleep(2500);
+            Thread.sleep(2500);
         }
         catch(Exception e)
         {
@@ -102,7 +102,7 @@ public class Minesweeper
             System.out.println("3.Hard [12x12, 30 mines]");
             System.out.println("4.Custom["+Ccolumns+"x"+Crows+", "+Cbombs+" mines]");
             System.out.println("Type in the option number below");
-            int c=j.nextInt();
+            int c= scn.nextInt();
             switch(c)
             {
                 case 1:
@@ -136,21 +136,65 @@ public class Minesweeper
                 System.out.println("Runs:"+runs);
                 System.out.println("Wins:"+wins);
                 System.out.println("Losses:"+losses);
-                String s=j.next();
+                String s=scn.next();
                 menu();
                 
                 default:
                 System.out.println("Please enter a valid number\n\n");
                 menu();
             }
-            grid=new boolean[columns][rows];
-            gridAnswer=new byte[columns][rows];
-            gridFill(grid,gridAnswer);
+            grid = new boolean[columns][rows];
+            answerGrid = new byte[columns][rows];
+            gridFill();
     }
         
+    private void bombInsert(int y, int x)
+    {
+        grid[y][x] = true; // 00 is the top corner, y increases downwards and x increases right
+        
+        if(y!=0)// If it's not the top row
+        {
+            answerGrid[y-1][j]++;
+            if(x!=0) //If it's not the top left corner
+            {
+               answerGrid[y-1][x-1]++;
+            }
+            
+            if(x!=columns-1)//If it's not the top right corner
+            {
+               answerGrid[y-1][x+1]++;
+
+            }
+          }
+          
+          if(x!=0)// If it's not the leftmost column
+          {
+            answerGrid[y][x-1]++;
+            
+            if(y!=rows-1)//If it's not the bottom left corner
+            {
+              answerGrid[y+1][x-1]++;
+            }
+          }          
+          
+          
+          if(y!=rows-1)// If it's not the bottom row
+          {
+            answerGrid[y+1][x]++;
+            
+            if(x!= columns-1)// If it's not the bottom right corner  
+            {
+                answerGrid[y+1][x+1]++;
+            }          
+          }
+            
+          if(j!=rows-1) // If it's not the rightmost column
+          {
+            answerGrid[i][j+1]++;      
+          }
+     }
     
-    
-    private void gridFill(boolean grid[][],byte gridAnswer[][])// fills the grids with mines and numbers
+    private void gridFill()// fills the grids with mines and numbers
     {
         int bombDefuse=0;  //to prevent more mines being set than the limit for that difficulty
         for(int i=0;i<rows;i++)
@@ -159,36 +203,8 @@ public class Minesweeper
           {
              if(check<Math.random()) //for random placement of mines
              {
-                grid[i][j]=true; //true indicates a mine in that location
+                bombInsert(i,j);
                 bombDefuse++;
-                if(i!=0) // to increase the numbers of adjacent spaces (114-141)
-                {
-                    gridAnswer[i-1][j]++;
-                    if(j!=0)
-                    {
-                        gridAnswer[i-1][j-1]++;
-                    }
-                    if(j!=columns-1)
-                    {
-                        gridAnswer[i-1][j+1]++;
-                        if(i!=rows-1)
-                        {
-                            gridAnswer[i+1][j+1]++;
-                        }
-                    }
-                }
-                if(j!=0)
-                {
-                    gridAnswer[i][j-1]++;
-                    if(i!=rows-1)
-                    {
-                        gridAnswer[i+1][j-1]++;
-                    }
-                }
-                if(i!=columns-1)
-                gridAnswer[i+1][j]++;
-                if(j!=rows-1)
-                gridAnswer[i][j+1]++;
              }
              if(bombDefuse==bombs)// if the bomb limit is reached
              {
@@ -206,7 +222,7 @@ public class Minesweeper
         }
         else // sends non-admins straight to the game
         {
-            play(grid,gridAnswer);
+            play(grid,answerGrid);
         }
     }
     
@@ -225,15 +241,16 @@ public class Minesweeper
        {
          for(int j=0;j<rows;j++)
          {
-             System.out.print(gridAnswer[i][j]+" ");
+             System.out.print(answerGrid[i][j]+" ");
          }
          System.out.println();
        }  
-       String s=j.next();
-       play(grid,gridAnswer);
+       String s= scn.next();
+       play(grid,answerGrid);
     }
     
-    private void play(boolean grid[][],byte gridAnswer[][])// the actual game coding
+    
+    private void play(boolean grid[][],byte answerGrid[][])// the actual game coding
     {
         String gridDisplay[][]=new String [rows+2][columns+2];// the 2D matrix which is diplayed
         for(int i=0;i<rows+2;i++)// fills all non-playing areas with line numbers and seperators 
@@ -322,7 +339,7 @@ public class Minesweeper
             }        
             else //to show the number of mines next to that space from the next time onwards if it is not a mine
             {
-                gridDisplay[r-1][c+1]=String.valueOf(gridAnswer[r-1][c-1]);
+                gridDisplay[r-1][c+1]=String.valueOf(answerGrid[r-1][c-1]);
             }
         }  
         if(prize)//if the player fills every non-mine space
