@@ -1,10 +1,11 @@
 import java.util.Scanner;
+import java.util.InputMismatchException;
 
 public class Minesweeper
 {
-    private int Crows;       // to store custom values 
-    private int Ccolumns;    
-    private int Cbombs;
+    private final int Crows;       // to store custom values 
+    private final int Ccolumns;    
+    private final int Cbombs;
     
     private int rows;        // to store the number of rows and columns each run       
     private int columns;      
@@ -16,10 +17,8 @@ public class Minesweeper
     
     private boolean grid[][];    //to store the locations of the mines
     private byte answerGrid[][]; //to show the number of mines in proximity to each space
-    private double check;    //to provide a limit for the mines to be set
     private boolean admin;       //to activate admin mode
-    private Scanner scn;
-    
+    private final Scanner scn;
     
     public static void main(String args[]){
     	
@@ -59,18 +58,23 @@ public class Minesweeper
         rows = 0;          
         columns = 0;       
         bombs = 0;          
-        
-        check = 0.8;   
+         
         admin = false;     
         scn = new Scanner(System.in); 
     }
     
     private void start()//to start the program
     {
-        
         admin = false;
-        menu();
-        runs++;
+        
+        boolean play = true;
+        while(play){
+            
+            play = false;
+            menu();
+            runs++;
+        }
+        
         System.out.println("We hope you enjoyed your game.");
         System.out.println("See you again soon!"+(char)61514);
         try
@@ -84,70 +88,120 @@ public class Minesweeper
     }
     
     private void menu() //to allow choice of the size of the grid and activate admin mode
-    {
-            check=0.8; 
-            
+    {            
             System.out.println("Welcome to Minesweeper!"+(char)61517);
             try
             {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             }
             catch(Exception e)
             {
                 Thread.currentThread().interrupt();
             }
-            System.out.println("Choose your difficulty level:");
-            System.out.println("1.Easy [5x5, 5 mines]");
-            System.out.println("2.Medium [8x8, 15 mines]");
-            System.out.println("3.Hard [12x12, 30 mines]");
-            System.out.println("4.Custom["+Ccolumns+"x"+Crows+", "+Cbombs+" mines]");
-            System.out.println("Type in the option number below");
-            int c= scn.nextInt();
-            switch(c)
-            {
-                case 1:
-                columns=5;
-                rows=5;
-                bombs=5;
-                break;
+            
+            int opt = 0;
+            boolean valid = false;
+                                
+            while (!valid){
                 
-                case 2:
-                columns=8;
-                rows=8;
-                bombs=15;
-                break;
+                System.out.println("Choose your difficulty level:\n"+
+                                    "1.Easy [5x5, 5 mines]\n"+
+                                    "2.Medium [8x8, 16 mines]\n"+
+                                    "3.Hard [12x12, 48 mines]\n"+
+                                    "4.Custom["+Ccolumns+"x"+Crows+", "+Cbombs+" mines]\n"+
+                                    "Type in the option number below");
+                                    
+                try{                    
+                    opt = scn.nextInt();
+                }
+                catch(InputMismatchException e)
+                {
+                    System.out.println("Please enter a valid number\n\n");
+                    continue;
+                }
                 
-                case 3:
-                columns=12;
-                rows=12;
-                bombs=30;
-                break;
+                valid = true;
+                switch(opt)
+                {
+                    case 1:
+                        gridGenerate(5,5,5);
+                        break;
                 
-                case 4:
-                columns=Ccolumns;
-                rows=Crows;
-                bombs=Cbombs;
-                check=0.5;
-                break;
+                    case 2:
+                        gridGenerate(8,8,16);
+                        break;
                 
-                case 63: //admin mode for easier testing
-                admin=true;
-                System.out.println("Admin mode on");
-                System.out.println("Runs:"+runs);
-                System.out.println("Wins:"+wins);
-                System.out.println("Losses:"+losses);
-                String s=scn.next();
-                menu();
+                    case 3:
+                        gridGenerate(12,12,48);
+                        break;
                 
-                default:
-                System.out.println("Please enter a valid number\n\n");
-                menu();
+                    case 4:
+                        gridGenerate(Ccolumns,Crows,Cbombs);
+                        break;
+                
+                    case 63: //admin mode for easier testing
+                        admin=true;
+                        System.out.println("Admin mode on");
+                        System.out.print("Runs:"+runs+" Wins:"+wins+" Losses:"+losses);
+                        String s=scn.next();
+                        valid = false;
+                        break;
+                
+                    default:
+                        System.out.println("Please enter a valid number\n\n");
+                        valid = false;
+                        break;
+                }
             }
+            
             grid = new boolean[columns][rows];
             answerGrid = new byte[columns][rows];
             gridFill();
+            
+            if(admin)
+                peek();
+            
+            play();    
     }
         
+    private void gridGenerate(int rows, int columns, int bombs)
+    {
+        this.rows = rows;
+        this.columns = columns;
+        this.bombs = bombs;
+        
+        grid = new boolean[columns][rows];
+        answerGrid = new byte[columns][rows];
+        gridFill();
+    }    
+           
+    private void gridFill()// fills the grids with mines and numbers
+    {    
+
+        int bombsPlaced = 0;
+        int x = 0; 
+        int y = 0;
+        while(bombsPlaced < bombs)
+        {
+            y = (int)(Math.random() * (rows));
+            x = (int)(Math.random() * (columns));
+            
+            if(grid[y][x])
+                continue;
+            bombInsert(x,y);
+            bombsPlaced++;     
+        }
+        
+        if(admin) // opens the special admin features
+        {
+            peek();
+        }
+        else // sends non-admins straight to the game
+        {
+            play();
+        }
+    }
+    
     private void bombInsert(int x, int y)
     {
         grid[y][x] = true; // 00 is the top corner, y increases downwards and x increases right
@@ -191,58 +245,7 @@ public class Minesweeper
         {
           answerGrid[y][x+1]++;      
         }
-     }
-    
-    private void gridFill()// fills the grids with mines and numbers
-    {    
-        /** TODO: Remove this code after testing the new code works
-        
-        int bombDefuse=0;  //to prevent more mines being set than the limit for that difficulty
-        for(int i=0;i<rows;i++)
-        {
-          for(int j=0;j<columns;j++)
-          {
-             if(check<Math.random()) //for random placement of mines
-             {
-                bombInsert(i,j);
-                bombDefuse++;
-             }
-             if(bombDefuse==bombs)// if the bomb limit is reached
-             {
-               break;
-             }
-          }
-          if(bombDefuse==bombs)
-          {
-              break;
-          }
-        }
-        **/
-        
-        int bombsPlaced = 0;
-        int x = 0; 
-        int y = 0;
-        while(bombsPlaced < bombs)
-        {
-            y = (int)(Math.random() * rows);
-            x = (int)(Math.random() * columns);
-            if(grid[y][x])
-                continue;
-            bombInsert(x,y);
-            bombsPlaced++;     
-        }
-        
-        if(admin) // opens the special admin features
-        {
-            peek();
-        }
-        else // sends non-admins straight to the game
-        {
-            play();
-        }
-    }
-    
-    
+     }    
     
     void peek() //allows admins to see the layout of the grids(ran every time during alpha testing)
     {
@@ -264,7 +267,6 @@ public class Minesweeper
          System.out.println();
        }  
        String s= scn.next();
-       play();
     }
     
     

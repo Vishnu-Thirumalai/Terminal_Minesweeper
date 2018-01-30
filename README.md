@@ -3,7 +3,7 @@ Minesweeper running on the command line. An old project from back at school, reb
 
 ## TODO:
 * General code polish
-* Improve making the field - Change how the generation works
+* Fix the looping bug
 * Fix the display
 * Fix exception handling everywhere
 
