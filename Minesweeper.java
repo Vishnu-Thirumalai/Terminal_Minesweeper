@@ -145,9 +145,6 @@ public class Minesweeper {
 					System.out.println("Admin mode on");
 					System.out.print("Runs:" + runs + " Wins:" + wins
 							+ " Losses:" + losses);
-					scn.next();
-					valid = false;
-					break;
 
 				default:
 					System.out.println("Please enter a valid number");
