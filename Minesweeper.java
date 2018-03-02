@@ -69,11 +69,25 @@ public class Minesweeper {
 		admin = false;
 
 		boolean play = true;
+		String opt;
 		while (play) {
 
 			play = false;
 			menu();
 			runs++;
+			
+			System.out.println("\nPlay again?Y/N");
+			opt = scn.next();
+			if(opt.equalsIgnoreCase("Y"))
+			{
+				play = true;
+			}
+			else if(opt.equalsIgnoreCase("N"))
+			{}
+			else
+			{
+				System.out.println("Defaulting to No.");
+			}
 		}
 
 		System.out.println("We hope you enjoyed your game.");
@@ -266,59 +280,22 @@ public class Minesweeper {
 
 	private void play()// the actual game coding
 	{
-		/**
-		 * String gridDisplay[][] = new String[rows + 2][columns + 2];// the 2D
-		 * // matrix // which is // diplayed for (int i = 0; i < rows + 2;
-		 * i++)// fills all non-playing areas with // line numbers and
-		 * seperators { for (int j = 0; j < columns + 2; j++) {
-		 * gridDisplay[i][j] = " "; if (j == 1 && i == columns - 1) {
-		 * gridDisplay[i][j] = "|"; } else if (j == 0 && i != columns) {
-		 * gridDisplay[i][j] = String.valueOf(i + 1); } else if (i == columns &&
-		 * j != 0 && j < rows + 1) { if (j == 1) { gridDisplay[i][j] = "    " +
-		 * String.valueOf(j); } else { gridDisplay[i][j] = "" +
-		 * String.valueOf(j); } } else if (j == 1) { gridDisplay[i][j] = "|"; }
-		 * else if (i == rows - 1 && j < columns + 2) { gridDisplay[i][j] = "_";
-		 * } } }
-		 **/
-
 		boolean[][] revealed = new boolean[grid.length][grid.length];
 		boolean prize = true;
 		int r = 0;
 		int c = 0;
-		for (int k = 0; k <= ((columns * rows) - bombs); k++)// makes the grid
-																// print
-																// multiple
-																// times
+		for (int k = 0; k <= ((columns * rows) - bombs);)// makes the grid print multiple time
 		{
-			System.out.print("\f"); // clears the screen, which was cluttered up
-									// during alpha testing
+			System.out.print("\f"); // clears the screen, which was cluttered up during alpha testing
 			gridDisplay(answerGrid, revealed);
-			/**
-			 * for (int i = 0; i < columns + 1; i++)// diplays the screen { for
-			 * (int j = 0; j < rows + 2; j++) { if (j != rows)
-			 * System.out.print(gridDisplay[i][j] + "   "); else
-			 * System.out.print(gridDisplay[i][j] + "  "); }
-			 * System.out.println("\n"); }
-			 **/
-			System.out
-					.println(columns * rows - k - bombs + " spaces remaining");// to
-																				// show
-																				// how
-																				// many
-																				// non-mine
-																				// spaces
-																				// are
-																				// remaining(requested
-																				// in
-																				// beta
-																				// testing)
+
+			System.out.println(columns * rows - k - bombs + " spaces remaining");// to show how many non-mine spaces are remaining(requested in beta testing)																	
 			System.out.print("Enter the column number:");
 			c = scn.nextInt();
 			System.out.print("Enter the row number:");
 			r = scn.nextInt();
-			if (c > columns || r > rows || c < 0 || r < 0)// if the player
-															// gives invalid
-															// co-ordinates
+			
+			if (c > columns || r > rows || c < 0 || r < 0)// if the player gives invalid co-ordinates
 			{
 				System.out.println("Invalid co-ordinates");
 				try {
@@ -326,19 +303,19 @@ public class Minesweeper {
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
-				k--;
-			} else {
-				if (grid[r][c] == true)// when the player hits a mine
-				{
-					endLoss();
-					prize = false;
-					break;
-				} else // to show the number of mines next to that space from
-						// the next time onwards if it is not a mine
-				{
-					revealed[r][c] = true;
-				}
-			}
+			} 
+			else if (grid[r][c] == true)// when the player hits a mine
+			{
+				endLoss();
+				prize = false;
+				break;
+			}				
+			else if(!revealed[r][c]) // to show the number of mines next to that space from the next time onwards if it is not a mine
+			{
+				revealed[r][c] = true;
+				k++; 
+			}	 
+			//else the space has been revealed already
 		}
 		if (prize)// if the player fills every non-mine space
 		{
