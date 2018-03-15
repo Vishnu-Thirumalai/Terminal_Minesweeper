@@ -1,5 +1,8 @@
+package model;
 import java.util.Scanner;
 import java.util.InputMismatchException;
+
+import display.Display;
 
 public class Minesweeper {
 	private final int Crows; // to store custom values
@@ -22,10 +25,10 @@ public class Minesweeper {
 	private boolean admin; // to activate admin mode
 	private final Scanner scn;
 
+	private Display d;
 
 
-	Minesweeper(int Crows, int Ccolumns, int Cbombs)// to accept values for the
-													// custom mode
+	Minesweeper(int Crows, int Ccolumns, int Cbombs, Display d)// to accept values for the custom mode
 	{
 		this.Ccolumns = Ccolumns;
 		this.Crows = Crows;
@@ -35,10 +38,12 @@ public class Minesweeper {
 		columns = 0;
 		bombs = 0;
 
+		this.d = d;
 		admin = false;
 		scn = new Scanner(System.in);
 	}
 
+	
 	public void start()// to start the program
 	{
 		admin = false;
@@ -51,31 +56,15 @@ public class Minesweeper {
 			runs++;
 		}
 
-		System.out.println("We hope you enjoyed your game.");
-		System.out.println("See you again soon!" + (char) 61514);
-		try {
-			Thread.sleep(2500);
-		} catch (Exception e) {
-			Thread.currentThread().interrupt();
-		}
+		d.displayFarewell();
+
 	}
 
 	private void menu() // to allow choice of the size of the grid and activate
 						// admin mode
 	{
-		System.out.println("Welcome to Minesweeper!" + (char) 61517);
-		try {
-			Thread.sleep(1000);
-		} catch (Exception e) {
-			Thread.currentThread().interrupt();
-		}
 
-		System.out.println("Choose your difficulty level:\n"
-				+ "1.Easy [5xprivate5, 5 mines]\n" + "2.Medium [8x8, 16 mines]\n"
-				+ "3.Hard [12x12, 48 mines]\n" + "4.Custom[" + Ccolumns + "x"
-				+ Crows + ", " + Cbombs + " mines]\n"
-				+ "Type in the option number below");
-
+		d.displayMenu();
 		int opt = 0;
 		boolean valid = false;
 
@@ -106,9 +95,6 @@ public class Minesweeper {
 					System.out.println("Admin mode on");
 					System.out.print("Runs:" + runs + " Wins:" + wins
 							+ " Losses:" + losses);
-					scn.next();
-					valid = false;
-					break;
 
 				default:
 					System.out.println("Please enter a valid number");
@@ -147,10 +133,10 @@ public class Minesweeper {
 		int bombsPlaced = 0;
 		int x = 0;
 		int y = 0;
-		while (bombsPlaced < bombs) {
+		while (bombsPlaced != bombs) {
 			y = (int) (Math.random() * (rows));
 			x = (int) (Math.random() * (columns));
-
+			
 			if (grid[y][x])
 				continue;
 			bombInsert(x, y);
@@ -159,8 +145,7 @@ public class Minesweeper {
 	}
 
 	private void bombInsert(int x, int y) {
-		grid[y][x] = true; // 00 is the top corner, y increases downwards and x
-							// increases right
+		grid[y][x] = true; // 00 is the top corner, y increases downwards and x increases right
 
 		if (y != 0)// If it's not the top row
 		{
@@ -256,11 +241,11 @@ public class Minesweeper {
 		 * } } }
 		 **/
 
-		boolean[][] revealed = new boolean[grid.length][grid.length];
+		boolean[][] revealed = new boolean[columns][rows];
 		boolean prize = true;
 		int r = 0;
 		int c = 0;
-		for (int k = 0; k <= ((columns * rows) - bombs); k++)// makes the grid
+		for (int k = 0; k < ((columns * rows) - bombs);)// makes the grid
 																// print
 																// multiple
 																// times
@@ -291,7 +276,7 @@ public class Minesweeper {
 			c = scn.nextInt();
 			System.out.print("Enter the row number:");
 			r = scn.nextInt();
-			if (c > columns || r > rows || c < 0 || r < 0)// if the player
+			if (c >= columns || r >= rows || c < 0 || r < 0)// if the player
 															// gives invalid
 															// co-ordinates
 			{
@@ -301,17 +286,16 @@ public class Minesweeper {
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
-				k--;
 			} else {
 				if (grid[r][c] == true)// when the player hits a mine
 				{
 					endLoss();
 					prize = false;
 					break;
-				} else // to show the number of mines next to that space from
-						// the next time onwards if it is not a mine
+				}else if(!revealed[r][c]) // to show the number of mines next to that space from next time if not already revealed (and not a mine)
 				{
 					revealed[r][c] = true;
+					k++;
 				}
 			}
 		}
@@ -322,27 +306,27 @@ public class Minesweeper {
 	}
 
 	private void endLoss() {
-		System.out.print("\f");
-		System.out.println("     " + (char) 61613);
-		System.out.println("  " + (char) 61613 + (char) 61613 + (char) 61613
-				+ (char) 61613 + (char) 61613);
-		System.out.println(" " + (char) 61613 + (char) 61613 + (char) 61613
-				+ (char) 61517 + (char) 61613 + (char) 61613 + (char) 61613);
-		System.out.println("  " + (char) 61613 + (char) 61613 + (char) 61613
-				+ (char) 61613 + (char) 61613);
-		System.out.println("     " + (char) 61613);
-		System.out.println((char) 61517 + "KABOOM!!" + (char) 61517);
-		System.out.println((char) 61518 + "You lost." + (char) 61518);
-		System.out.println("Better luck next time!");
+
+		d.displayLoss();
 		losses++;
 	}
 
 	private void endWin() {
 
-		System.out.println("\f");
-		System.out.println((char) 61591 + " Congratulations !!" + (char) 61590);
-		System.out.println("You won!!" + (char) 61505);
+		d.displayWin();
 		wins++;
+	}
+
+	public int getCcolumns() {
+		return Ccolumns;
+	}
+	
+	public int getCrows() {
+		return Crows;
+	}
+
+	public int getCbombs() {
+		return Cbombs;
 	}
 }
 
