@@ -28,8 +28,10 @@ public class setup {
 			}
 		}
 		
+		if(d==null){
+			d = new ASCIIDisplay();
+		}
 		
-		d = new ASCIIDisplay();
 		Minesweeper minesweep = new Minesweeper(r, c, b, d);
 		d.setModel(minesweep);
 		minesweep.start();

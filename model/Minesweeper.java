@@ -1,6 +1,8 @@
 package model;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.InputMismatchException;
+import java.util.Arrays;
 
 import display.Display;
 
@@ -13,15 +15,17 @@ public class Minesweeper {
 	private int columns;
 	private int bombs;
 
-	static private int wins = 0; // to store the number of runs, wins and losses
-									// across all objects
+	static private int wins = 0; // to store the number of runs, wins and losses across all objects									
 	static private int losses = 0;
 	static private int runs = 0;
 
 	private boolean grid[][]; // to store the locations of the mines
-	private byte answerGrid[][]; // to show the number of mines in proximity to
-									// each space
-
+	private byte answerGrid[][]; // to show the number of mines in proximity to ach space
+	
+	private boolean[][] revealed; 
+	private int remainingSpaces;
+	private boolean playing;
+	
 	private boolean admin; // to activate admin mode
 	private final Scanner scn;
 
@@ -48,12 +52,12 @@ public class Minesweeper {
 	{
 		admin = false;
 
-		boolean play = true;
-		while (play) {
+		boolean game = true;
+		while (game) {
 
-			play = false;
-			menu();
+			game = false;
 			runs++;
+			menu();
 		}
 
 		d.displayFarewell();
@@ -92,17 +96,15 @@ public class Minesweeper {
 
 				case 63: // admin mode for easier testing
 					admin = true;
-					System.out.println("Admin mode on");
-					System.out.print("Runs:" + runs + " Wins:" + wins
-							+ " Losses:" + losses);
+					d.displayAdmin();
 
 				default:
-					System.out.println("Please enter a valid number");
+					
 					valid = false;
 					break;
 				}
 			} catch (InputMismatchException e) {
-				System.out.println("Please enter a valid number");
+				d.displayOptionInputError();
 				continue;
 			}
 		}
@@ -111,8 +113,10 @@ public class Minesweeper {
 		answerGrid = new byte[columns][rows];
 		gridFill();
 
-		if (admin)
-			peek();
+		if (admin){
+			d.revealMineField();
+			d.revealNumGrid();
+		}
 
 		play();
 	}
@@ -188,40 +192,11 @@ public class Minesweeper {
 		}
 	}
 
-	void peek() // allows admins to see the layout of the grids(ran every time
-				// during alpha testing)
-	{
-		for (int i = 0; i < columns; i++) {
-			for (int j = 0; j < rows; j++) {
-				System.out.print(grid[i][j] + " ");
-			}
-			System.out.println();
-		}
-		System.out.println();
-		for (int i = 0; i < columns; i++) {
-			for (int j = 0; j < rows; j++) {
-				System.out.print(answerGrid[i][j] + " ");
-			}
-			System.out.println();
-		}
-		String s = scn.next();
-	}
 
-	private void gridDisplay(byte[][] grid, boolean[][] revealed) {
+	private void playDisplay() {
 
-		System.out.print("  ");
-		for (int idx = 0; idx < grid.length; idx++) {
-			System.out.print(idx + " ");
-		}
-		System.out.println();
-
-		for (int i = 0; i < grid.length; i++) {
-			System.out.print(i + " ");
-			for (int j = 0; j < grid[i].length; j++) {
-				System.out.print((revealed[i][j] ? grid[i][j] : "?") + " ");
-			}
-			System.out.println();
-		}
+		d.displayGrid();
+		d.displayPrompt();
 	}
 
 	private void play()// the actual game coding
@@ -232,7 +207,7 @@ public class Minesweeper {
 		 * i++)// fills all non-playing areas with // line numbers and
 		 * seperators { for (int j = 0; j < columns + 2; j++) {
 		 * gridDisplay[i][j] = " "; if (j == 1 && i == columns - 1) {
-		 * gridDisplay[i][j] = "|"; } else if (j == 0 && i != columns) {
+		 * gridDisplboolean[][] revealed ay[i][j] = "|"; } else if (j == 0 && i != columns) {
 		 * gridDisplay[i][j] = String.valueOf(i + 1); } else if (i == columns &&
 		 * j != 0 && j < rows + 1) { if (j == 1) { gridDisplay[i][j] = "    " +
 		 * String.valueOf(j); } else { gridDisplay[i][j] = "" +
@@ -241,18 +216,44 @@ public class Minesweeper {
 		 * } } }
 		 **/
 
-		boolean[][] revealed = new boolean[columns][rows];
-		boolean prize = true;
-		int r = 0;
-		int c = 0;
-		for (int k = 0; k < ((columns * rows) - bombs);)// makes the grid
-																// print
-																// multiple
-																// times
+		revealed = new boolean[columns][rows];
+		remainingSpaces = (columns * rows) - bombs;
+		playing = true;
+
+		while(playing)
 		{
-			System.out.print("\f"); // clears the screen, which was cluttered up
-									// during alpha testing
-			gridDisplay(answerGrid, revealed);
+			playDisplay();
+		}
+	}
+	
+	public void revealSpace(int r, int c)
+	{
+		if(playing)
+		{
+			if (c >= columns || r >= rows || c < 0 || r < 0)// if the player gives invalid co-ordinates
+			{
+				d.displayCoordinateInputError();
+			}
+			else
+			{
+				if (grid[r][c] == true)// when the player hits a mine
+				{
+					endLoss();
+					playing = false;
+				} else if (!revealed[r][c]) // to show the number of mines next to that space from next time if not already revealed (and not a mine)
+				{
+					revealed[r][c] = true;
+					remainingSpaces--;
+				}
+			}
+			
+			if (remainingSpaces == 0)// if the player fills every non-mine space
+			{
+				endWin();
+				playing = false;
+			}
+		}
+		
 			/**
 			 * for (int i = 0; i < columns + 1; i++)// diplays the screen { for
 			 * (int j = 0; j < rows + 2; j++) { if (j != rows)
@@ -260,49 +261,6 @@ public class Minesweeper {
 			 * System.out.print(gridDisplay[i][j] + "  "); }
 			 * System.out.println("\n"); }
 			 **/
-			System.out
-					.println(columns * rows - k - bombs + " spaces remaining");// to
-																				// show
-																				// how
-																				// many
-																				// non-mine
-																				// spaces
-																				// are
-																				// remaining(requested
-																				// in
-																				// beta
-																				// testing)
-			System.out.print("Enter the column number:");
-			c = scn.nextInt();
-			System.out.print("Enter the row number:");
-			r = scn.nextInt();
-			if (c >= columns || r >= rows || c < 0 || r < 0)// if the player
-															// gives invalid
-															// co-ordinates
-			{
-				System.out.println("Invalid co-ordinates");
-				try {
-					Thread.sleep(1750);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			} else {
-				if (grid[r][c] == true)// when the player hits a mine
-				{
-					endLoss();
-					prize = false;
-					break;
-				}else if(!revealed[r][c]) // to show the number of mines next to that space from next time if not already revealed (and not a mine)
-				{
-					revealed[r][c] = true;
-					k++;
-				}
-			}
-		}
-		if (prize)// if the player fills every non-mine space
-		{
-			endWin();
-		}
 	}
 
 	private void endLoss() {
@@ -327,6 +285,37 @@ public class Minesweeper {
 
 	public int getCbombs() {
 		return Cbombs;
+	}
+	
+	public HashMap<String,Integer> getScoreData(){
+		
+		HashMap<String,Integer> ret = new HashMap<>(3);
+		ret.put("RUNS",runs);
+		ret.put("WINS", wins);
+		ret.put("LOSSES", losses);
+		
+		return ret;
+	}
+
+	public boolean[][] getMineGrid() {
+		return Arrays.copyOf(grid,grid.length);
+	}
+
+
+	public byte[][] getNumGrid() {
+		return Arrays.copyOf(answerGrid,answerGrid.length);
+	}
+	
+	public boolean[][] getRevealedGrid(){
+		return Arrays.copyOf(revealed, revealed.length);
+	}
+	
+	public boolean getPlaying(){
+		return playing;
+	}
+	
+	public int getRemainingSpaces(){
+		return remainingSpaces;
 	}
 }
 
