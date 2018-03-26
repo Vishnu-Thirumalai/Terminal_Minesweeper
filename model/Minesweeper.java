@@ -20,7 +20,7 @@ public class Minesweeper {
 	static private int runs = 0;
 
 	private boolean grid[][]; // to store the locations of the mines
-	private byte answerGrid[][]; // to show the number of mines in proximity to ach space
+	private byte answerGrid[][]; // to show the number of mines in proximity to each space
 	
 	private boolean[][] revealed; 
 	private int remainingSpaces;
@@ -242,8 +242,11 @@ public class Minesweeper {
 					playing = false;
 				} else if (!revealed[r][c]) // to show the number of mines next to that space from next time if not already revealed (and not a mine)
 				{
-					revealed[r][c] = true;
-					remainingSpaces--;
+					spaceOpen(r,c);
+					if(answerGrid[r][c] == 0)
+					{
+						cascade(r,c);
+					}
 				}
 			}
 			
@@ -262,7 +265,40 @@ public class Minesweeper {
 			 * System.out.println("\n"); }
 			 **/
 	}
+	
+	private void cascade(int r, int c) //Only called from inside revealSpace, so no need for checks
+	{
+		if(r<0 && !revealed[r-1][c] && answerGrid[r-1][c] == 0)
+		{
+			spaceOpen(r-1,c);
+			cascade(r-1,c);
 
+		}
+		if(c<0 && !revealed[r][c-1] && answerGrid[r][c-1] == 0)
+		{
+			spaceOpen(r,c-1);
+			cascade(r,c-1);
+
+		}
+		if(r<rows-1 && !revealed[r+1][c] && answerGrid[r+1][c] == 0)
+		{
+			spaceOpen(r+1,c);
+			cascade(r+1,c);
+
+		}
+		if(c<columns-1 && !revealed[r][c+1] && answerGrid[r][c+1] == 0)
+		{
+			spaceOpen(r,c+1);
+			cascade(r,c+1);
+		}
+	}
+
+	private void spaceOpen(int r, int c)
+	{
+		revealed[r][c] = true;
+		remainingSpaces--;
+	}
+	
 	private void endLoss() {
 
 		d.displayLoss();
@@ -318,4 +354,6 @@ public class Minesweeper {
 		return remainingSpaces;
 	}
 }
+
+
 
