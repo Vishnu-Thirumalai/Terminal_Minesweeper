@@ -51,7 +51,7 @@ public class ASCIIDisplay extends Display{
 		System.out.println("     " + (char) 61613);
 		System.out.println((char) 61517 + "KABOOM!!" + (char) 61517);
 		System.out.println((char) 61518 + "You lost." + (char) 61518);
-		System.out.println("Bettreturn by valueer luck next time!");
+		System.out.println("Better luck next time!");
 		
 	}
 

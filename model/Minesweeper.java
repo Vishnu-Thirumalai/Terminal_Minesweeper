@@ -268,28 +268,32 @@ public class Minesweeper {
 	
 	private void cascade(int r, int c) //Only called from inside revealSpace, so no need for checks
 	{
-		if(r<0 && !revealed[r-1][c] && answerGrid[r-1][c] == 0)
+		if(r<0 && !revealed[r-1][c])
 		{
 			spaceOpen(r-1,c);
-			cascade(r-1,c);
+			if(answerGrid[r-1][c] == 0)
+				cascade(r-1,c);
 
 		}
-		if(c<0 && !revealed[r][c-1] && answerGrid[r][c-1] == 0)
+		if(c<0 && !revealed[r][c-1] )
 		{
 			spaceOpen(r,c-1);
-			cascade(r,c-1);
+			if(answerGrid[r][c-1] == 0)
+				cascade(r,c-1);
 
 		}
-		if(r<rows-1 && !revealed[r+1][c] && answerGrid[r+1][c] == 0)
+		if(r<rows-1 && !revealed[r+1][c])
 		{
 			spaceOpen(r+1,c);
-			cascade(r+1,c);
+			if(answerGrid[r+1][c] == 0)
+				cascade(r+1,c);
 
 		}
-		if(c<columns-1 && !revealed[r][c+1] && answerGrid[r][c+1] == 0)
+		if(c<columns-1 && !revealed[r][c+1])
 		{
 			spaceOpen(r,c+1);
-			cascade(r,c+1);
+			if(answerGrid[r][c+1] == 0)
+				cascade(r,c+1);
 		}
 	}
 
