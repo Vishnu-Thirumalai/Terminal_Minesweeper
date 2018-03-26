@@ -22,11 +22,13 @@ public abstract class Display {
 	public abstract void revealMineField();
 	public abstract void revealNumGrid();
 	
-	public abstract void displayPrompt();
+	public abstract void displayGamePrompt();
 	public abstract void displayLoss();
 	public abstract void displayWin();
 	
 	public abstract void displayOptionInputError();
 	public abstract void displayCoordinateInputError();
+
+	public abstract void displayReplayPrompt();
 }
 

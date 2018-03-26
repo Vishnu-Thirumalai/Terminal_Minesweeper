@@ -28,6 +28,7 @@ public class Minesweeper {
 	
 	private boolean admin; // to activate admin mode
 	private final Scanner scn;
+	private boolean replay;
 
 	private Display d;
 
@@ -52,12 +53,13 @@ public class Minesweeper {
 	{
 		admin = false;
 
-		boolean game = true;
-		while (game) {
+		replay = true;
+		while (replay) {
 
-			game = false;
+			replay = false;
 			runs++;
 			menu();
+			d.displayReplayPrompt();
 		}
 
 		d.displayFarewell();
@@ -179,7 +181,6 @@ public class Minesweeper {
 		if (y != rows - 1)// If it's not the bottom row
 		{
 			answerGrid[y + 1][x]++;
-
 			if (x != columns - 1)// If it's not the bottom right corner
 			{
 				answerGrid[y + 1][x + 1]++;
@@ -196,12 +197,14 @@ public class Minesweeper {
 	private void playDisplay() {
 
 		d.displayGrid();
-		d.displayPrompt();
+		d.displayGamePrompt();
 	}
 
 	private void play()// the actual game coding
 	{
-		/**
+		/**A privacy reminder from YouTube, a Google company
+GB
+
 		 * String gridDisplay[][] = new String[rows + 2][columns + 2];// the 2D
 		 * // matrix // which is // diplayed for (int i = 0; i < rows + 2;
 		 * i++)// fills all non-playing areas with // line numbers and
@@ -268,28 +271,28 @@ public class Minesweeper {
 	
 	private void cascade(int r, int c) //Only called from inside revealSpace, so no need for checks
 	{
-		if(r<0 && !revealed[r-1][c])
+		if(r>0 && checkSpaceForCascade(r-1,c))
 		{
 			spaceOpen(r-1,c);
 			if(answerGrid[r-1][c] == 0)
 				cascade(r-1,c);
 
 		}
-		if(c<0 && !revealed[r][c-1] )
+		if(c>0 && checkSpaceForCascade(r,c-1) )
 		{
 			spaceOpen(r,c-1);
 			if(answerGrid[r][c-1] == 0)
 				cascade(r,c-1);
 
 		}
-		if(r<rows-1 && !revealed[r+1][c])
+		if(r<rows-1 && checkSpaceForCascade(r+1,c))
 		{
 			spaceOpen(r+1,c);
 			if(answerGrid[r+1][c] == 0)
 				cascade(r+1,c);
 
 		}
-		if(c<columns-1 && !revealed[r][c+1])
+		if(c<columns-1 && checkSpaceForCascade(r,c+1))
 		{
 			spaceOpen(r,c+1);
 			if(answerGrid[r][c+1] == 0)
@@ -297,6 +300,11 @@ public class Minesweeper {
 		}
 	}
 
+	private boolean checkSpaceForCascade(int r, int c)
+	{
+		return !revealed[r][c] && !grid[r][c];
+	}
+	
 	private void spaceOpen(int r, int c)
 	{
 		revealed[r][c] = true;
@@ -356,6 +364,11 @@ public class Minesweeper {
 	
 	public int getRemainingSpaces(){
 		return remainingSpaces;
+	}
+	
+	public void playAgain()
+	{
+		replay = true;
 	}
 }
 

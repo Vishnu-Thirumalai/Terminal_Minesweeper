@@ -9,6 +9,13 @@ public class ASCIIDisplay extends Display{
 
 	private boolean [][] mineGrid = null;
 	private byte [][] numGrid = null;
+	private Scanner scn;
+	
+	public ASCIIDisplay()
+	{
+		super();
+		scn = new Scanner(System.in);
+	}
 	
 	@Override
 	public void displayFarewell() {
@@ -31,7 +38,7 @@ public class ASCIIDisplay extends Display{
 		}
 
 		System.out.println("Choose your difficulty level:\n"
-				+ "1.Easy [5x5, 5 mines]\n" + "2.Medium [8x8, 16 mines]\n"
+				+ "1.Easy [5x5, anotherString5 mines]\n" + "2.Medium [8x8, 16 mines]\n"
 				+ "3.Hard [12x12, 48 mines]\n" + "4.Custom[" + model.getCcolumns() + "x"
 				+ model.getCrows() + ", " + model.getCbombs() + " mine(s)]\n"
 				+ "Type in the option number below");
@@ -64,7 +71,7 @@ public class ASCIIDisplay extends Display{
 		
 	}
 
-	@Override
+
 	public void displayAdmin() {
 		
 		System.out.println("Admin mode activated");
@@ -147,9 +154,9 @@ public class ASCIIDisplay extends Display{
 	}
 
 	@Override
-	public void displayPrompt() {
+	public void displayGamePrompt() {
 		
-		Scanner scn = new Scanner(System.in);
+		
 		System.out.println(model.getRemainingSpaces() + " spaces remaining");
 		
 		System.out.print("Enter the column number:");
@@ -158,6 +165,28 @@ public class ASCIIDisplay extends Display{
 		int r = scn.nextInt();
 		
 		model.revealSpace(r, c);
+	}
+
+	@Override
+	public void displayReplayPrompt() {		
+		System.out.println("Play again? (Y/N)");
+		String s;
+		
+		while(true)
+		{
+			s = scn.next();
+		
+			if(s.equalsIgnoreCase("Y"))
+			{
+				model.playAgain();
+				break;
+			}
+			else if (s.equalsIgnoreCase("N"))
+			{
+				continue;
+			}
+			System.out.println("Please enter Y or N");
+		}
 	}
 
 }
