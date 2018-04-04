@@ -5,6 +5,7 @@ import java.util.InputMismatchException;
 import java.util.Arrays;
 
 import display.Display;
+import model.SquareState;
 
 public class Minesweeper {
 	private final int Crows; // to store custom values
@@ -19,10 +20,10 @@ public class Minesweeper {
 	static private int losses = 0;
 	static private int runs = 0;
 
-	private boolean grid[][]; // to store the locations of the mines
-	private byte answerGrid[][]; // to show the number of mines in proximity to each space
+	private boolean mineGrid[][]; // to store the locations of the mines
+	private byte numGrid[][]; // to show the number of mines in proximity to each space
 	
-	private boolean[][] revealed; 
+	private SquareState[][] playStateGrid; 
 	private int remainingSpaces;
 	private boolean playing;
 	
@@ -111,8 +112,8 @@ public class Minesweeper {
 			}
 		}
 
-		grid = new boolean[columns][rows];
-		answerGrid = new byte[columns][rows];
+		mineGrid = new boolean[columns][rows];
+		numGrid = new byte[columns][rows];
 		gridFill();
 
 		if (admin){
@@ -128,8 +129,8 @@ public class Minesweeper {
 		this.columns = columns;
 		this.bombs = bombs;
 
-		grid = new boolean[columns][rows];
-		answerGrid = new byte[columns][rows];
+		mineGrid = new boolean[columns][rows];
+		numGrid = new byte[columns][rows];
 		gridFill();
 	}
 
@@ -143,7 +144,7 @@ public class Minesweeper {
 			y = (int) (Math.random() * (rows));
 			x = (int) (Math.random() * (columns));
 			
-			if (grid[y][x])
+			if (mineGrid[y][x])
 				continue;
 			bombInsert(x, y);
 			bombsPlaced++;
@@ -151,45 +152,45 @@ public class Minesweeper {
 	}
 
 	private void bombInsert(int x, int y) {
-		grid[y][x] = true; // 00 is the top corner, y increases downwards and x increases right
+		mineGrid[y][x] = true; // 00 is the top corner, y increases downwards and x increases right
 
 		if (y != 0)// If it's not the top row
 		{
-			answerGrid[y - 1][x]++;
+			numGrid[y - 1][x]++;
 			if (x != 0) // If it's not the top left corner
 			{
-				answerGrid[y - 1][x - 1]++;
+				numGrid[y - 1][x - 1]++;
 			}
 
 			if (x != columns - 1)// If it's not the top right corner
 			{
-				answerGrid[y - 1][x + 1]++;
+				numGrid[y - 1][x + 1]++;
 
 			}
 		}
 
 		if (x != 0)// If it's not the leftmost column
 		{
-			answerGrid[y][x - 1]++;
+			numGrid[y][x - 1]++;
 
 			if (y != rows - 1)// If it's not the bottom left corner
 			{
-				answerGrid[y + 1][x - 1]++;
+				numGrid[y + 1][x - 1]++;
 			}
 		}
 
 		if (y != rows - 1)// If it's not the bottom row
 		{
-			answerGrid[y + 1][x]++;
+			numGrid[y + 1][x]++;
 			if (x != columns - 1)// If it's not the bottom right corner
 			{
-				answerGrid[y + 1][x + 1]++;
+				numGrid[y + 1][x + 1]++;
 			}
 		}
 
 		if (x != columns - 1) // If it's not the rightmost column
 		{
-			answerGrid[y][x + 1]++;
+			numGrid[y][x + 1]++;
 		}
 	}
 
@@ -202,7 +203,7 @@ public class Minesweeper {
 
 	private void play()// the actual game coding
 	{
-		/**A privacy reminder from YouTube, a Google company
+		/*
 GB
 
 		 * String gridDisplay[][] = new String[rows + 2][columns + 2];// the 2D
@@ -219,7 +220,13 @@ GB
 		 * } } }
 		 **/
 
-		revealed = new boolean[columns][rows];
+		playStateGrid = new SquareState[columns][rows];
+		
+		for(SquareState[] col: playStateGrid)
+		{
+			Arrays.fill(col,SquareState.NORMAL);
+		}
+		
 		remainingSpaces = (columns * rows) - bombs;
 		playing = true;
 
@@ -229,7 +236,7 @@ GB
 		}
 	}
 	
-	public void revealSpace(int r, int c)
+	public void selectSpace(int r, int c, SquareState newState)
 	{
 		if(playing)
 		{
@@ -239,14 +246,14 @@ GB
 			}
 			else
 			{
-				if (grid[r][c] == true)// when the player hits a mine
+				if (mineGrid[r][c] == true)// when the player hits a mine
 				{
 					endLoss();
 					playing = false;
-				} else if (!revealed[r][c]) // to show the number of mines next to that space from next time if not already revealed (and not a mine)
+				} else if (playStateGrid[r][c] != SquareState.REVEALED) // to show the number of mines next to that space from next time if not already revealed (and not a mine)
 				{
-					spaceOpen(r,c);
-					if(answerGrid[r][c] == 0)
+					spaceReveal(r,c);
+					if(numGrid[r][c] == 0)
 					{
 						cascade(r,c);
 					}
@@ -271,43 +278,44 @@ GB
 	
 	private void cascade(int r, int c) //Only called from inside revealSpace, so no need for checks
 	{
+		System.out.println(r+""+c);
 		if(r>0 && checkSpaceForCascade(r-1,c))
 		{
-			spaceOpen(r-1,c);
-			if(answerGrid[r-1][c] == 0)
+			spaceReveal(r-1,c);
+			if(numGrid[r-1][c] == 0)
 				cascade(r-1,c);
 
 		}
-		if(c>0 && checkSpaceForCascade(r,c-1) )
+		if(c>0 && checkSpaceForCascade(r,c-1))
 		{
-			spaceOpen(r,c-1);
-			if(answerGrid[r][c-1] == 0)
+			spaceReveal(r,c-1);
+			if(numGrid[r][c-1] == 0)
 				cascade(r,c-1);
 
 		}
 		if(r<rows-1 && checkSpaceForCascade(r+1,c))
 		{
-			spaceOpen(r+1,c);
-			if(answerGrid[r+1][c] == 0)
+			spaceReveal(r+1,c);
+			if(numGrid[r+1][c] == 0)
 				cascade(r+1,c);
 
 		}
 		if(c<columns-1 && checkSpaceForCascade(r,c+1))
 		{
-			spaceOpen(r,c+1);
-			if(answerGrid[r][c+1] == 0)
+			spaceReveal(r,c+1);
+			if(numGrid[r][c+1] == 0)
 				cascade(r,c+1);
 		}
 	}
 
 	private boolean checkSpaceForCascade(int r, int c)
 	{
-		return !revealed[r][c] && !grid[r][c];
+		return playStateGrid[r][c]==SquareState.NORMAL && !mineGrid[r][c];
 	}
 	
-	private void spaceOpen(int r, int c)
+	private void spaceReveal(int r, int c)
 	{
-		revealed[r][c] = true;
+		playStateGrid[r][c] = SquareState.REVEALED;
 		remainingSpaces--;
 	}
 	
@@ -323,6 +331,11 @@ GB
 		wins++;
 	}
 
+	public void playAgain()
+	{
+		replay = true;
+	}
+	
 	public int getCcolumns() {
 		return Ccolumns;
 	}
@@ -346,16 +359,15 @@ GB
 	}
 
 	public boolean[][] getMineGrid() {
-		return Arrays.copyOf(grid,grid.length);
+		return Arrays.copyOf(mineGrid,mineGrid.length);
 	}
-
 
 	public byte[][] getNumGrid() {
-		return Arrays.copyOf(answerGrid,answerGrid.length);
+		return Arrays.copyOf(numGrid,numGrid.length);
 	}
 	
-	public boolean[][] getRevealedGrid(){
-		return Arrays.copyOf(revealed, revealed.length);
+	public SquareState[][] getPlayStateGrid(){
+		return Arrays.copyOf(playStateGrid, playStateGrid.length);
 	}
 	
 	public boolean getPlaying(){
@@ -366,10 +378,7 @@ GB
 		return remainingSpaces;
 	}
 	
-	public void playAgain()
-	{
-		replay = true;
-	}
+
 }
 
 

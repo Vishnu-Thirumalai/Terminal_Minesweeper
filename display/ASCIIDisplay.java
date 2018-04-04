@@ -3,6 +3,8 @@ package display;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import model.SquareState;
+
 
 
 public class ASCIIDisplay extends Display{
@@ -93,7 +95,10 @@ public class ASCIIDisplay extends Display{
 	
 	public void revealMineField(){
 		
-		mineGrid = mineGrid==null?model.getMineGrid():mineGrid;
+		if(mineGrid == null)
+		{
+			mineGrid = model.getMineGrid();
+		}
 		
 		for (int i = 0; i < mineGrid.length; i++) {
 			for (int j = 0; j < mineGrid[i].length; j++) {
@@ -107,7 +112,10 @@ public class ASCIIDisplay extends Display{
 	
 	public void revealNumGrid(){
 		
-		numGrid = numGrid==null?model.getNumGrid():numGrid;
+		if(numGrid == null)
+		{
+			numGrid = model.getNumGrid();
+		}
 		
 		for (int i = 0; i < numGrid.length; i++) {
 			for (int j = 0; j < numGrid[i].length; j++) {
@@ -135,19 +143,34 @@ public class ASCIIDisplay extends Display{
 	public void displayGrid() {
 		
 		System.out.print("\f");
-		numGrid = numGrid==null?model.getNumGrid():numGrid;
-		boolean[][] revealed = model.getRevealedGrid();
+		if(numGrid == null)
+		{
+			numGrid = model.getNumGrid();
+		}
 		
-		System.out.print("  ");
+		SquareState[][] stateGrid = model.getPlayStateGrid();
+		
+		System.out.print(" ");
 		for (int idx = 0; idx < numGrid.length; idx++) {
 			System.out.print(idx + " ");
 		}
 		System.out.println();
 
 		for (int i = 0; i < numGrid.length; i++) {
-			System.out.print(i + " ");
+			System.out.print(i+" ");
 			for (int j = 0; j < numGrid[i].length; j++) {
-				System.out.print((revealed[i][j] ? numGrid[i][j] : "?") + " ");
+				switch(stateGrid[i][j])
+				{
+					case REVEALED:
+						System.out.print(numGrid[i][j]);
+						break;
+					case NORMAL:	
+						System.out.print("X");
+						break;
+					default:
+						System.out.print("H");
+				}
+				System.out.print(" ");
 			}
 			System.out.println();
 		}
@@ -163,8 +186,10 @@ public class ASCIIDisplay extends Display{
 		int c = scn.nextInt();
 		System.out.print("Enter the row number:");
 		int r = scn.nextInt();
+		System.out.print("Reveal(R), Flag (F), Question(Q), Unflag(U)?");
+		String o = scn.next();
 		
-		model.revealSpace(r, c);
+		model.selectSpace(r, c, SquareState.REVEALED);
 	}
 
 	@Override
@@ -183,7 +208,7 @@ public class ASCIIDisplay extends Display{
 			}
 			else if (s.equalsIgnoreCase("N"))
 			{
-				continue;
+				break;
 			}
 			System.out.println("Please enter Y or N");
 		}
